@@ -10,10 +10,31 @@ logging.basicConfig(level=logging.DEBUG)
 @app.route('/execute', methods=['POST'])
 def execute_script():
     app.logger.debug("Received request: %s", request.data)
+    
+    # Check if JSON payload is provided
+    if not request.is_json:
+        return jsonify({"error": "Request must be in JSON format"}), 400
+    
     data = request.get_json()
     script = data.get('script', '')
-    local_vars = {}
 
+    # Basic input validation
+    if not script:
+        return jsonify({"error": "No script provided"}), 400
+    
+    if not isinstance(script, str):
+        return jsonify({"error": "Script must be a string"}), 400
+
+    if len(script) > 1000:  # Arbitrary size limit for security
+        return jsonify({"error": "Script is too long"}), 400
+
+    # Basic keyword filtering
+    disallowed_keywords = ['import', 'exec', 'eval', 'os', 'subprocess']
+    if any(keyword in script for keyword in disallowed_keywords):
+        return jsonify({"error": "Script contains disallowed keywords"}), 400
+
+    local_vars = {}
+    
     try:
         # Execute the script in a controlled environment
         exec(script, {}, local_vars)
