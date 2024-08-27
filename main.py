@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 import json
 import logging
+import numpy as np
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -28,16 +30,20 @@ def execute_script():
     if len(script) > 1000:  # Arbitrary size limit for security
         return jsonify({"error": "Script is too long"}), 400
 
-    # Basic keyword filtering
-    disallowed_keywords = ['import', 'exec', 'eval', 'os', 'subprocess']
+    # Basic keyword filtering with numpy and pandas allowed
+    disallowed_keywords = [
+        'sys', 'shutil', 'open', 'builtins', 'input', 'compile',
+        'pickle', 'cPickle', 'execfile', 'getattr', 'setattr', 'delattr',
+        'os.system', 'subprocess.Popen'
+    ]
+    
     if any(keyword in script for keyword in disallowed_keywords):
         return jsonify({"error": "Script contains disallowed keywords"}), 400
-
     local_vars = {}
     
     try:
-        # Execute the script in a controlled environment
-        exec(script, {}, local_vars)
+        # Provide 'numpy' and 'pandas' as 'np' and 'pd' to the exec environment
+        exec(script, {'np': np, 'pd': pd}, local_vars)
         
         # Check if 'main' function is defined
         if 'main' not in local_vars or not callable(local_vars['main']):

@@ -1,6 +1,6 @@
 # python-script
 
-# correct curl command
+# Correct Curl Command to Test http://localhost:8080/execute 
 curl -X POST http://localhost:8080/execute \
     -H "Content-Type: application/json" \
     -d '{"script": "def main():\n    return {\"message\": \"Hello, world!\"}\n"}'
@@ -10,6 +10,7 @@ Should return:
 {
     "output": "{\"message\": \"Hello, world!\"}\n"
 }
+
 
 
 # Test Case: Script Without a main() Function
@@ -24,6 +25,7 @@ Should return:
 }
 
 
+
 # Test Case: Script Where main() Does Not Return JSON
 curl -X POST http://localhost:8080/execute \
     -H "Content-Type: application/json" \
@@ -34,3 +36,27 @@ Should return:
 {
     "error": "The 'main' function must return a JSON object."
 }
+
+
+
+# Testing for Malicious Input
+curl -X POST http://localhost:8080/execute \
+    -H "Content-Type: application/json" \
+    -d '{"script": "def main():\n    import os\n    os.system(\"rm -rf /\")"}'
+
+Should return:
+
+{
+    "error":"Script contains disallowed keywords"
+}
+
+
+
+# Testing for Numpy and Pandas
+curl -X POST http://localhost:8080/execute \
+    -H "Content-Type: application/json" \
+    -d '{"script": "import numpy as np\nimport pandas as pd\ndef main():\n    arr = np.array([1, 2, 3])\n    df = pd.DataFrame({\"A\": arr, \"B\": arr * 2})\n    return df.to_dict()"}'
+
+Should return:
+
+{"A":{"0":1,"1":2,"2":3},"B":{"0":2,"1":4,"2":6}}
