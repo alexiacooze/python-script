@@ -1,8 +1,5 @@
 # python-script
 
-# Run Unit Tests in Terminal
-docker run --rm python-script-takehome pytest
-
 # Correct Curl Command to Test http://localhost:8080/execute 
 curl -X POST http://localhost:8080/execute \
     -H "Content-Type: application/json" \
@@ -37,7 +34,7 @@ curl -X POST http://localhost:8080/execute \
 Should return:
 
 {
-    "error": "The 'main' function must return a JSON object."
+    "error": "The 'main' function must return a JSON serializable dictionary."
 }
 
 

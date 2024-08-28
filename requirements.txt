@@ -1,9 +1,6 @@
-werkzeug
-pytest
-numpy 
-pandas 
-python
-python3
 Flask==3.0.3
 gunicorn==22.0.0
-Werkzeug==3.0.3
+werkzeug
+pytest
+numpy>=2.0.0
+pandas>=2.2.0
